@@ -32,5 +32,4 @@ Check out [doc/Getting Started with Python.docx][1]
 
 @drdoran
 
-
-[1]: https://raw.githubusercontent.com/drdoran/maize/refs/heads/master/doc/Getting%20Started%20with%20Python.docx
+[1]: https://github.com/drdoran/maize/raw/refs/heads/main/doc/Getting%20Started%20with%20Python.docx
