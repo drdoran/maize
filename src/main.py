@@ -5,29 +5,37 @@ import sys
 import termios
 import tty
 from maize_reader import load_maze, find_player
+from rich.console import Console
+from rich.text import Text
+
+console = Console()
 
 def get_key():
-    """Get a single character from standard input (Unix only)."""
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
         tty.setraw(fd)
         ch = sys.stdin.read(1)
         if ch == '\x1b':
-            ch += sys.stdin.read(2)  # For arrow keys
+            ch += sys.stdin.read(2)  # for arrow keys
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
 def print_maze(maze, player_pos):
-    os.system('clear')
+    console.clear()
     for y, row in enumerate(maze):
+        line = Text()
         for x, char in enumerate(row):
             if (x, y) == player_pos:
-                print('P', end='')
+                line.append("P", style="bold yellow")
+            elif char == '#':
+                line.append("█", style="dim")
+            elif char == 'E':
+                line.append("E", style="bold green")
             else:
-                print(char, end='')
-        print()
+                line.append(" ")
+        console.print(line)
 
 def move(player_pos, direction, maze):
     x, y = player_pos
@@ -38,16 +46,16 @@ def move(player_pos, direction, maze):
     return player_pos
 
 def main():
-    maze = load_maze("maze.txt")
+    maze = load_maze(os.path.join(os.path.dirname(__file__), "../data/maze.txt"))
     player_pos = find_player(maze)
 
     key_map = {
         'w': (0, -1), 's': (0, 1),
         'a': (-1, 0), 'd': (1, 0),
-        '\x1b[A': (0, -1),  # Up arrow
-        '\x1b[B': (0, 1),   # Down arrow
-        '\x1b[D': (-1, 0),  # Left arrow
-        '\x1b[C': (1, 0),   # Right arrow
+        '\x1b[A': (0, -1),
+        '\x1b[B': (0, 1),
+        '\x1b[D': (-1, 0),
+        '\x1b[C': (1, 0),
     }
 
     while True:
@@ -57,6 +65,10 @@ def main():
             break
         if key in key_map:
             player_pos = move(player_pos, key_map[key], maze)
+            x, y = player_pos
+            if maze[y][x] == 'E':
+                console.print("\n[bold green]You reached the exit![/bold green]\n")
+                break
 
 if __name__ == "__main__":
     main()
